@@ -1,0 +1,26 @@
+stages:
+  - build
+
+variables:
+  DOCKER_DRIVER: overlay2
+
+before_script:
+  - sudo docker info
+  - sudo docker login -u pdromartins -p "$DOCKER_PASSWORD" docker.io
+
+build:
+  stage: build
+  script:
+    - echo "Building the Docker image"
+    - sudo docker build -t pdromartins/desafio02 . --file Dockerfile
+    - echo "Pushing the Docker image"
+    - sudo docker push pdromartins/desafio02
+    - sudo docker ps -q -f name=desafio02 && echo "O container desafio02 já está em execução. Ignorando o comando docker run." || (echo "O container desafio02 não está em execução. Iniciando o container." && sudo docker run -d --name desafio02 -p 80:80 pdromartins/desafio02)
+
+
+  tags:
+    - aws2  # Tag atribuída ao seu runner
+
+  only:
+    - main
+
